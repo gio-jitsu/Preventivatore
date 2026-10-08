@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guida - Preventivatore Bando</title>
+<style>
+:root { --bg:#faf9f5; --ink:#1b1b1f; --text:#4f4f57; --muted:#86868f; --line:#e6e4dc; --accent:#cf551b; --tint:#fef1e7; --card:#fff; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font:15px/1.6 "DejaVu Sans", Verdana, Arial, sans-serif; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 24px clamp(12px, 3vw, 32px) 48px; }
+.brand { font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); }
+h1 { color:var(--ink); font-size:clamp(24px,4vw,34px); line-height:1.2; margin:16px 0 8px; }
+h2 { color:var(--accent); font-size:18px; margin:0 0 10px; }
+.lead { color:var(--muted); margin:0 0 24px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 22px; margin-bottom:16px; }
+nav.indice { background:var(--tint); border:1px solid #f6d9c4; border-radius:12px; padding:14px 22px; margin-bottom:16px; }
+nav.indice a { color:var(--accent); text-decoration:none; margin-right:14px; white-space:nowrap; }
+nav.indice a:hover { text-decoration:underline; }
+ul, ol { margin:6px 0 0; padding-left: 22px; }
+li { margin-bottom: 4px; }
+table { width:100%; border-collapse:collapse; margin-top:8px; font-size:14px; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { background:var(--tint); color:var(--accent); }
+code, kbd { background:var(--tint); color:var(--accent); padding:1px 6px; border-radius:4px; font-size:13px; }
+.avviso { background:var(--tint); border-left:4px solid var(--accent); padding:10px 14px; border-radius:6px; margin-top:10px; }
+footer { color:var(--muted); font-size:12px; text-align:center; margin-top:24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="brand">1nnovaTeam</span>
+  <h1>Guida al Preventivatore bando</h1>
+  <p class="lead">Come usare lo strumento per calcolare lo sconto effettivo di una pratica e generare il documento per il cliente.</p>
+
+  <nav class="indice">
+    <a href="#dati">Dati pratica</a><a href="#preventivi">Preventivi</a><a href="#riepilogo">Riepilogo</a><a href="#note">Note</a><a href="#export">Word e PDF</a><a href="#errori">Errori</a>
+  </nav>
+
+  <section class="card" id="dati">
+    <h2>1. Dati pratica</h2>
+    <table>
+      <tr><th>Campo</th><th>Cosa inserire</th></tr>
+      <tr><td>Cliente / Bando</td><td>Ragione sociale e nome del bando. Compaiono nel documento generato.</td></tr>
+      <tr><td>Pratica (€)</td><td>Importo della pratica (costo complessivo fisso a 2.500 €). Minimo 1.000 €, massimo 2.500 €.</td></tr>
+      <tr><td>Dimensione azienda</td><td>Determina la percentuale di beneficio: micro 65%, piccola 60%, media 50%.</td></tr>
+      <tr><td>Recupera IVA</td><td>Di default <b>Sì</b>. Se <b>No</b>, compare l'avviso «Compilare con i prezzi CON IVA».</td></tr>
+    </table>
+    <p>Gli importi si scrivono all'italiana (<code>1.266,80</code> o <code>1266,8</code>) e vengono formattati automaticamente (<code>€ 1.266,80</code>) quando si esce dal campo.</p>
+  </section>
+
+  <section class="card" id="preventivi">
+    <h2>2. Preventivi fornitori</h2>
+    <ul>
+      <li><b>+ Aggiungi preventivo</b> inserisce una nuova riga (descrizione, fornitore, importo).</li>
+      <li>Il pulsante <b>×</b> a fine riga rimuove il preventivo; la numerazione si aggiorna da sola.</li>
+      <li>Una riga è considerata compilata se ha almeno un campo valorizzato; le righe vuote vengono ignorate.</li>
+      <li>La riga <b>Consulenza</b> compare in automatico quando costo pratica e studio di fattibilità sono diversi: vale <i>costo pratica − pratica</i>. La descrizione è modificabile.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="riepilogo">
+    <h2>3. Riepilogo</h2>
+    <p>Si aggiorna in tempo reale a ogni modifica.</p>
+    <table>
+      <tr><th>Voce</th><th>Significato</th></tr>
+      <tr><td>Imponibile</td><td>Consulenza + somma dei preventivi.</td></tr>
+      <tr><td>Beneficio</td><td>Imponibile × percentuale della dimensione azienda, fino al massimale di 25.000 €.</td></tr>
+      <tr><td>Residuo al massimale</td><td>25.000 − beneficio.</td></tr>
+      <tr><td>Spesa ancora ammissibile</td><td>Residuo ÷ percentuale: quanta spesa si può ancora aggiungere.</td></tr>
+      <tr><td>Subtotale / Studio / Totale</td><td>Spesa al netto del beneficio, studio di fattibilità e totale a carico del cliente.</td></tr>
+      <tr><td>Incidenza costo</td><td>Totale ÷ imponibile.</td></tr>
+      <tr><td><b>Sconto EFFETTIVO</b></td><td>1 − incidenza: il risultato finale.</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="note">
+    <h2>4. Note</h2>
+    <ul>
+      <li><b>+ Aggiungi note</b> apre un editor con grassetto, corsivo, elenchi puntati/numerati e «Pulisci». Il testo incollato perde la formattazione esterna.</li>
+      <li><b>Salva</b> conferma, <b>Annulla</b> chiude senza modifiche, <b>Elimina note</b> le cancella.</li>
+      <li><b>Niente note</b>: nel documento non compare la pagina Note.</li>
+      <li><b>Note vuote</b>: stampa una pagina con righe da compilare a mano.</li>
+      <li>Le due opzioni si escludono a vicenda. Le note stanno sempre in una pagina a parte.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="export">
+    <h2>5. Generare Word e PDF</h2>
+    <ol>
+      <li>Compila almeno un preventivo.</li>
+      <li>Premi <b>Word</b> per un file <code>.docx</code> oppure <b>PDF</b>.</li>
+      <li>Il file viene scaricato come <code>Simulazione_NomeCliente</code>.</li>
+    </ol>
+    <p>Il documento contiene anagrafica, preventivi, riepilogo e riquadro dello sconto effettivo. Con fino a 10 preventivi il contenuto viene compresso per stare in una sola pagina.</p>
+  </section>
+
+  <section class="card" id="errori">
+    <h2>6. Messaggi di errore</h2>
+    <ul>
+      <li><b>Studio di fattibilità superiore al costo pratica</b>: correggi l'importo, il campo è evidenziato.</li>
+      <li><b>Bando non fattibile</b>: il beneficio è inferiore a 4.000 €.</li>
+    </ul>
+    <div class="avviso">Finché c'è un errore, o se non c'è nessun preventivo compilato, i pulsanti Word e PDF restano disabilitati.</div>
+  </section>
+
+  <footer>1nnovaTeam · Finanza agevolata, innovazione e crescita d'impresa · <b>info@1nnovateam.it</b></footer>
+</div>
+</body>
+</html>

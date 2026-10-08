@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preventivatore Bando</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <img class="logo" src="src/icone/1T_Logo_R.png" alt="1nnovaTeam">
+  <a class="link-impostazioni" href="impostazioni.html">⚙ Impostazioni</a>
+</header>
+
+<main>
+  <span class="pill">Finanza agevolata &amp; bandi</span>
+  <div class="intro">
+    <h1>Preventivatore bando,<br><span class="accent">calcola lo sconto effettivo.</span></h1>
+    <aside id="avvisoIva" class="avviso" hidden><strong>Recupero IVA</strong><br>Compilare con i prezzi <b>CON IVA</b></aside>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Dati pratica</h2>
+      <label>Cliente <input id="cliente" type="text" placeholder="Ragione sociale"></label>
+      <label>Bando <input id="bando" type="text" placeholder="Innovazione PMI 2026 Piemonte"></label>
+      <label hidden>Costo pratica (€) <input id="costoPratica" class="money" type="text" inputmode="decimal" value="2500"></label>
+      <label>Pratica (€) <input id="studioFattibilita" class="money" type="text" inputmode="decimal" value="2500"></label>
+      <p id="errore" class="errore" role="alert" hidden>Errore: l'importo della pratica non può superare 2.500 €.</p>
+      <label>Dimensione azienda
+        <select id="beneficio">
+          <option value="65">micro - 65%</option>
+          <option value="60">piccola - 60%</option>
+          <option value="50">media - 50%</option>
+        </select>
+      </label>
+      <label>Recupera IVA
+        <select id="recuperaIva">
+          <option value="no">No</option>
+          <option value="si" selected>Sì</option>
+        </select>
+      </label>
+      <button id="apriNote" type="button" class="btn-note">+ Aggiungi note</button>
+      <div class="opzioni-note">
+        <label><input type="checkbox" id="noteNiente"> Niente note</label>
+        <label><input type="checkbox" id="noteVuote"> Note vuote</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Preventivi fornitori</h2>
+        <button id="aggiungi" type="button" class="btn-add">+ Aggiungi preventivo</button>
+      </div>
+      <div class="prev-head"><span>N.</span><span>Descrizione</span><span>Fornitore</span><span>Importo</span><span></span></div>
+      <div id="preventivi"></div>
+      <div class="voce-auto" id="rigaConsulenza" hidden>
+        <span class="num" id="numConsulenza">–</span><span class="desc"><input id="descConsulenza" type="text" value="Consulenza" placeholder="Descrizione"></span><span><input id="fornConsulenza" type="text" value="Innovation Manager" placeholder="Fornitore"></span><strong id="consulenza">–</strong><span></span>
+      </div>
+    </section>
+
+    <section class="card hero">
+      <h2>Riepilogo</h2>
+      <p id="erroreBeneficio" class="errore" role="alert" hidden></p>
+      <dl>
+        <div><dt>Imponibile</dt><dd id="imponibile">–</dd></div>
+        <div><dt id="benefLabel">Beneficio</dt><dd id="benefEuro">–</dd></div>
+        <div><dt>Residuo al massimale <small>(25.000 − beneficio)</small></dt><dd id="residuo">–</dd></div>
+        <div><dt>Spesa ancora ammissibile <small>(residuo ÷ %)</small></dt><dd id="spesaResidua">–</dd></div>
+        <div><dt>Subtotale</dt><dd id="subtotale">–</dd></div>
+        <div><dt>Pratica</dt><dd id="studio">–</dd></div>
+        <div><dt>Totale</dt><dd id="totale">–</dd></div>
+        <div><dt>Incidenza costo</dt><dd id="incidenza">–</dd></div>
+      </dl>
+      <div class="big"><span>Sconto EFFETTIVO</span><strong id="sconto">–</strong></div>
+      <div class="azioni">
+        <button id="genera" class="btn-genera" type="button"> Word</button>
+        <button id="generaPdf" class="btn-genera" type="button"> PDF</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<dialog id="modaleNote" class="modale">
+  <form method="dialog" id="formNote">
+    <h2>Note</h2>
+    <div class="toolbar" role="toolbar" aria-label="Formattazione">
+      <button type="button" data-cmd="bold" title="Grassetto"><b>B</b></button>
+      <button type="button" data-cmd="italic" title="Corsivo"><i>I</i></button>
+      <button type="button" data-cmd="insertUnorderedList" title="Elenco puntato">• Elenco</button>
+      <button type="button" data-cmd="insertOrderedList" title="Elenco numerato">1. Elenco</button>
+      <button type="button" data-cmd="removeFormat" title="Rimuovi formattazione">Pulisci</button>
+    </div>
+    <div id="editorNote" class="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Testo delle note"></div>
+    <div class="modale-azioni">
+      <button type="button" id="annullaNote" class="secondario">Annulla</button>
+      <button type="button" id="svuotaNote" class="secondario">Elimina note</button>
+      <button type="button" id="salvaNote" class="btn-add">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<footer>1nnovaTeam · Finanza agevolata, innovazione e crescita d'impresa · <a id="apriGuida" href="guida.html" target="guidaPreventivatore">Guida</a> <b>info@1nnovateam.it</b></footer>
+<script src="docx.js"></script>
+<script src="jspdf.js"></script>
+<script src="jspdf-autotable.js"></script>
+<script src="src/assets.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

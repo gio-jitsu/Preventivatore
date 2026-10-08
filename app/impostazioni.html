@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impostazioni · Preventivatore Bando</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <img class="logo" src="src/icone/1T_Logo_R.png" alt="1nnovaTeam">
+  <a class="link-impostazioni" href="index.html">← Torna al preventivatore</a>
+</header>
+
+<main>
+  <span class="pill">Impostazioni</span>
+  <h1>Valori predefiniti</h1>
+
+  <section class="card card-impostazioni">
+    <h2>Pratica</h2>
+    <label>Costo pratica predefinito (€)
+      <input id="costoPratica" class="money" type="text" inputmode="decimal">
+    </label>
+    <p id="errore" class="errore" role="alert" hidden>Inserisci un importo maggiore di zero.</p>
+    <p id="stato" class="stato" role="status" hidden>Impostazioni salvate.</p>
+    <div class="azioni-impostazioni">
+      <button id="salva" type="button" class="btn-add">Salva</button>
+      <button id="ripristina" type="button" class="btn-note">Ripristina (2.500 €)</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin:14px 0 0">Le impostazioni sono salvate in questo browser: su un altro computer o browser vanno reimpostate.</p>
+  </section>
+</main>
+
+<script>
+const CHIAVE = "preventivatore.impostazioni";
+const DEFAULT_COSTO = 2500;
+const $ = (id) => document.getElementById(id);
+const eur = (v) => {
+  const [intero, dec] = Math.abs(v).toFixed(2).split(".");
+  return `€ ${intero.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${dec}`;
+};
+const parseEur = (t) => {
+  let x = String(t).replace(/[€\s]/g, "");
+  x = x.includes(",") ? x.replace(/\./g, "").replace(",", ".") : x;
+  return parseFloat(x) || 0;
+};
+const carica = () => { try { return JSON.parse(localStorage.getItem(CHIAVE) || "{}"); } catch (e) { return {}; } };
+
+function mostra(v) { $("costoPratica").value = eur(v); }
+function stato(ok, testo) {
+  $("stato").hidden = !ok;
+  $("errore").hidden = ok;
+  if (testo) (ok ? $("stato") : $("errore")).textContent = testo;
+}
+
+mostra(carica().costoPratica > 0 ? carica().costoPratica : DEFAULT_COSTO);
+
+$("salva").addEventListener("click", () => {
+  const v = parseEur($("costoPratica").value);
+  if (!(v > 0)) { $("stato").hidden = true; $("errore").hidden = false; return; }
+  try {
+    localStorage.setItem(CHIAVE, JSON.stringify({ ...carica(), costoPratica: v }));
+  } catch (e) { $("stato").hidden = true; $("errore").textContent = "Impossibile salvare: storage del browser non disponibile."; $("errore").hidden = false; return; }
+  mostra(v);
+  stato(true, "Impostazioni salvate.");
+});
+
+$("ripristina").addEventListener("click", () => {
+  try { const s = carica(); delete s.costoPratica; localStorage.setItem(CHIAVE, JSON.stringify(s)); } catch (e) {}
+  mostra(DEFAULT_COSTO);
+  stato(true, "Valore ripristinato.");
+});
+
+$("costoPratica").addEventListener("focus", (e) => { e.target.value = String(parseEur(e.target.value)).replace(".", ","); e.target.select(); });
+$("costoPratica").addEventListener("blur", (e) => { if (e.target.value.trim() !== "") e.target.value = eur(parseEur(e.target.value)); });
+$("costoPratica").addEventListener("input", () => { $("stato").hidden = true; $("errore").hidden = true; });
+</script>
+</body>
+</html>
