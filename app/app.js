@@ -234,6 +234,8 @@ function noteInBlocchi(html) {
 // --- Esportazione Word (.docx generato da zero, senza template) ---
 const ARANCIONE = "CF551B";
 const GRIGIO = "4F4F57";
+const ROSSO = "C62828";   // cifra dell'imponibile nel riepilogo
+const VERDE = "2E7D32";   // cifra del beneficio nel riepilogo
 
 // Dati comuni a Word e PDF
 function costruisciReport() {
@@ -255,14 +257,11 @@ function costruisciReport() {
       ...(r.consulenza !== 0 ? [[String(preventivi.length + 1), $("descConsulenza").value.trim() || "Consulenza", $("fornConsulenza").value.trim(), eur(r.consulenza)]] : []),
     ],
     riepilogo: [
-      ["Imponibile", eur(r.imponibile)],
-      ["Spesa da preventivi", eur(r.spesa)],
-      [`Beneficio (${pct(d.beneficio)}${r.massimale ? `, massimale ${eur(BENEFICIO_MAX)}` : ""})`, eur(r.benefEuro)],
+      Object.assign(["Imponibile", eur(r.imponibile)], { colore: ROSSO }),
+      Object.assign([`Beneficio (${pct(d.beneficio)}${r.massimale ? `, massimale ${eur(BENEFICIO_MAX)}` : ""})`, eur(r.benefEuro)], { colore: VERDE }),
       [`Residuo al massimale (${eur(BENEFICIO_MAX)} − beneficio)`, eur(r.residuo)],
       [`Spesa ancora ammissibile (residuo ÷ ${pct(d.beneficio)})`, eur(r.spesaResidua)],
-      ["Studio di fattibilità", eur(r.studio)],
-      ["Totale", eur(r.totale)],
-      ["Incidenza costo", pct(r.incidenza)],
+      ["Pratica", eur(d.studioFattibilita)],
     ],
     includiScontoPratica: $("includiScontoPratica").checked,
     scontoBando: pct(r.scontoBando),
@@ -308,7 +307,7 @@ function generaWord() {
 
   const testo = (t, o = {}) => new TextRun({ text: t, font: FONT, color: GRIGIO, ...o });
   const par = (t, o = {}, p = {}) => new Paragraph({ children: [testo(t, o)], ...p });
-  const cella = (t, larg, { bold = false, right = false, head = false } = {}) =>
+  const cella = (t, larg, { bold = false, right = false, head = false, colore = GRIGIO } = {}) =>
     new TableCell({
       width: { size: larg, type: WidthType.DXA },
       shading: head ? { type: ShadingType.CLEAR, fill: "FEF1E7", color: "auto" } : undefined,
@@ -316,7 +315,7 @@ function generaWord() {
       borders: { top: BORDO_CHIARO, bottom: BORDO_CHIARO, left: BORDO_CHIARO, right: BORDO_CHIARO },
       children: [new Paragraph({
         alignment: right ? AlignmentType.RIGHT : AlignmentType.LEFT,
-        children: [testo(t, { bold: bold || head, size: Math.round(9 * Math.max(k, 0.85) * 2), color: head ? ARANCIONE : GRIGIO })],
+        children: [testo(t, { bold: bold || head, size: Math.round(9 * Math.max(k, 0.85) * 2), color: head ? ARANCIONE : colore })],
       })],
     });
   const tabella = (intestazione, righe, destra, pesi) => {
@@ -328,7 +327,7 @@ function generaWord() {
       layout: TableLayoutType.FIXED,
       rows: [
         new TableRow({ tableHeader: true, cantSplit: true, children: intestazione.map((h, i) => cella(h, col[i], { head: true, right: destra.includes(i) })) }),
-        ...righe.map((riga) => new TableRow({ cantSplit: true, children: riga.map((c, i) => cella(c, col[i], { right: destra.includes(i) })) })),
+        ...righe.map((riga) => new TableRow({ cantSplit: true, children: riga.map((c, i) => cella(c, col[i], { right: destra.includes(i), ...(i === 1 && riga.colore ? { colore: riga.colore, bold: true } : {}) })) })),
       ],
     });
   };
@@ -510,7 +509,10 @@ function costruisciPdf(rep) {
         styles: { font: "Montserrat", fontSize: 9 * Math.max(k, 0.85), textColor: grigio, cellPadding: 2.5 * k, lineColor: [230, 228, 220], lineWidth: 0.1 },
         headStyles: { fillColor: hex("FEF1E7"), textColor: arancione, fontStyle: "bold" },
         columnStyles: Object.fromEntries(destra.map((i) => [i, { halign: "right" }])),
-        didParseCell: (h) => { if (h.section === "head" && destra.includes(h.column.index)) h.cell.styles.halign = "right"; },
+        didParseCell: (h) => {
+          if (h.section === "head" && destra.includes(h.column.index)) h.cell.styles.halign = "right";
+          if (h.section === "body" && h.column.index === 1 && h.row.raw && h.row.raw.colore) { h.cell.styles.textColor = hex(h.row.raw.colore); h.cell.styles.fontStyle = "bold"; }
+        },
       });
       y = doc.lastAutoTable.finalY;
     };

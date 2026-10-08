@@ -33,6 +33,12 @@
       Precompila il preventivatore con dati simulati
     </label>
     <p style="font-size:12px;color:var(--muted);margin:6px 0 0">Alla prossima apertura del preventivatore il form si riempie con cliente, bando e 10 preventivi di esempio.</p>
+    <h2 style="margin-top:22px">Aggiornamenti</h2>
+    <div class="azioni-impostazioni">
+      <button id="controllaAgg" type="button" class="btn-note">Controlla aggiornamenti</button>
+      <a id="scaricaAgg" class="btn-add" href="https://github.com/gio-jitsu/Preventivatore/archive/refs/heads/main.zip" hidden style="text-decoration:none">Scarica ultima versione (ZIP)</a>
+    </div>
+    <p id="esitoAgg" style="font-size:12px;color:var(--muted);margin:6px 0 0" role="status"></p>
     <p style="font-size:12px;color:var(--muted);margin:14px 0 0">Le impostazioni sono salvate in questo browser: su un altro computer o browser vanno reimpostate.</p>
   </section>
 </main>
@@ -83,6 +89,35 @@ $("datiSimulati").addEventListener("change", (e) => {
     localStorage.setItem(CHIAVE, JSON.stringify({ ...carica(), datiSimulati: e.target.checked }));
     stato(true, e.target.checked ? "Dati simulati attivati." : "Dati simulati disattivati.");
   } catch (err) { e.target.checked = !e.target.checked; $("stato").hidden = true; $("errore").textContent = "Impossibile salvare: storage del browser non disponibile."; $("errore").hidden = false; }
+});
+
+// Aggiornamenti: confronta l'ultimo commit di GitHub con quello dell'ultimo ZIP scaricato da qui
+const REPO = "gio-jitsu/Preventivatore";
+let ultimoSha = null;
+$("controllaAgg").addEventListener("click", async () => {
+  const esito = $("esitoAgg");
+  esito.textContent = "Controllo in corso…";
+  $("scaricaAgg").hidden = true;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/commits/main`, { headers: { Accept: "application/vnd.github+json" } });
+    if (!r.ok) throw new Error(r.status === 403 ? "troppe richieste a GitHub, riprova tra qualche minuto" : `errore ${r.status}`);
+    const c = await r.json();
+    ultimoSha = c.sha;
+    const data = new Date(c.commit.committer.date).toLocaleString("it-IT");
+    const msg = c.commit.message.split("\n")[0];
+    if (carica().versioneSha === ultimoSha) {
+      esito.textContent = `Sei aggiornato (${data} · ${msg}).`;
+    } else {
+      esito.textContent = `Ultima versione disponibile: ${data} · ${msg}. Scarica lo ZIP, estrailo e sostituisci i file dell'app.`;
+      $("scaricaAgg").hidden = false;
+    }
+  } catch (e) {
+    esito.textContent = `Impossibile controllare gli aggiornamenti: ${e.message || "connessione non disponibile"}.`;
+  }
+});
+$("scaricaAgg").addEventListener("click", () => {
+  if (!ultimoSha) return;
+  try { localStorage.setItem(CHIAVE, JSON.stringify({ ...carica(), versioneSha: ultimoSha })); } catch (e) {}
 });
 
 $("costoPratica").addEventListener("focus", (e) => { e.target.value = String(parseEur(e.target.value)).replace(".", ","); e.target.select(); });
