@@ -32,7 +32,8 @@ function calcola({ costoPratica, studioFattibilita, beneficio, preventivi }) {
   const studio = -studioFattibilita;                                       // K10
   const totale = spesa + benefEuro + studio;                               // K12
   const incidenza = imponibile ? -totale / imponibile : 0;                 // K14
-  return { consulenza, imponibile, spesa, benefLordo, massimale, benefEuro, residuo, spesaResidua, subtotale, studio, totale, incidenza, sconto: 1 - incidenza }; // K15
+  const scontoBando = imponibile ? benefEuro / imponibile : 0;             // b / a: solo impatto del beneficio
+  return { scontoBando, consulenza, imponibile, spesa, benefLordo, massimale, benefEuro, residuo, spesaResidua, subtotale, studio, totale, incidenza, sconto: imponibile ? (benefEuro - studioFattibilita) / imponibile : 0 }; // d / a, con d = b - Pratica (riga "Pratica" del riepilogo)
 }
 
 function leggi() {
@@ -90,6 +91,7 @@ function aggiorna() {
   $("studio").textContent = eur(r.studio);
   $("totale").textContent = eur(r.totale);
   $("incidenza").textContent = pct(r.incidenza);
+  $("scontoBando").textContent = pct(r.scontoBando);
   $("sconto").textContent = pct(r.sconto);
 }
 
@@ -121,8 +123,10 @@ function aggiungiPreventivo(dati = "") {
   rinumera();
 }
 
-// Dati di prova (10 preventivi): impostare DATI_PROVA a true per precompilare il form
-const DATI_PROVA = false;
+// Dati di prova (10 preventivi): si attivano dall'interruttore nelle Impostazioni (impostazioni.html)
+const DATI_PROVA = (() => {
+  try { return JSON.parse(localStorage.getItem("preventivatore.impostazioni") || "{}").datiSimulati === true; } catch (e) { return false; }
+})();
 if (DATI_PROVA) {
   $("cliente").value = "Azienda Esempio S.r.l.";
   $("bando").value = "Bando Digitalizzazione PMI";
@@ -260,6 +264,8 @@ function costruisciReport() {
       ["Totale", eur(r.totale)],
       ["Incidenza costo", pct(r.incidenza)],
     ],
+    includiScontoPratica: $("includiScontoPratica").checked,
+    scontoBando: pct(r.scontoBando),
     sconto: pct(r.sconto),
     nomeFile: `Simulazione_${(d.cliente || "bando").replace(/[^\w-]+/g, "_")}`,
   };
@@ -342,8 +348,12 @@ function generaWord() {
         margins: { top: mm(2), bottom: mm(2), left: mm(5), right: mm(5) },
         borders: { top: BORDO_ARANCIONE, bottom: BORDO_ARANCIONE, left: BORDO_ARANCIONE, right: BORDO_ARANCIONE },
         children: [
-          par("Sconto effettivo", { bold: true, size: 18, color: ARANCIONE }),
-          par(rep.sconto, { bold: true, size: 32 }, { spacing: { before: 40 } }),
+          par("Sconto sui beni", { bold: true, size: 18, color: ARANCIONE }),
+          par(rep.scontoBando, { bold: true, size: 32 }, { spacing: { before: 40 } }),
+          ...(rep.includiScontoPratica ? [
+            par("Sconto effettivo con pratica inclusa", { bold: true, size: 18, color: ARANCIONE }, { spacing: { before: 120 } }),
+            par(rep.sconto, { bold: true, size: 32 }, { spacing: { before: 40 } }),
+          ] : []),
         ],
       })],
     })],
@@ -512,10 +522,13 @@ function costruisciPdf(rep) {
     y += 10 * k;
     nuovaPaginaSe(24);
     doc.setFillColor(247, 247, 245).setDrawColor(...arancione).setLineWidth(0.7).rect(M, y, W - 2 * M, 20, "FD");
-    font("Montserrat", "bold", 9, arancione);
-    doc.text("Sconto effettivo", M + 5, y + 7);
-    font("Montserrat", "bold", 16, grigio);
-    doc.text(rep.sconto, M + 5, y + 15);
+    const meta = (W - 2 * M) / 2;
+    [["Sconto sui beni", rep.scontoBando, M + 5], ...(rep.includiScontoPratica ? [["Sconto effettivo con pratica inclusa", rep.sconto, M + meta + 5]] : [])].forEach(([et, val, x]) => {
+      font("Montserrat", "bold", 9, arancione);
+      doc.text(et, x, y + 7);
+      font("Montserrat", "bold", 16, grigio);
+      doc.text(val, x, y + 15);
+    });
   };
 
   // Fino a 10 preventivi (+ consulenza) il layout deve stare sempre in una sola pagina:

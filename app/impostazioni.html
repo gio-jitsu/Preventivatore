@@ -27,6 +27,12 @@
       <button id="salva" type="button" class="btn-add">Salva</button>
       <button id="ripristina" type="button" class="btn-note">Ripristina (2.500 €)</button>
     </div>
+    <h2 style="margin-top:22px">Sviluppo</h2>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+      <input id="datiSimulati" type="checkbox" style="width:auto;margin:0">
+      Precompila il preventivatore con dati simulati
+    </label>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">Alla prossima apertura del preventivatore il form si riempie con cliente, bando e 10 preventivi di esempio.</p>
     <p style="font-size:12px;color:var(--muted);margin:14px 0 0">Le impostazioni sono salvate in questo browser: su un altro computer o browser vanno reimpostate.</p>
   </section>
 </main>
@@ -69,6 +75,14 @@ $("ripristina").addEventListener("click", () => {
   try { const s = carica(); delete s.costoPratica; localStorage.setItem(CHIAVE, JSON.stringify(s)); } catch (e) {}
   mostra(DEFAULT_COSTO);
   stato(true, "Valore ripristinato.");
+});
+
+$("datiSimulati").checked = carica().datiSimulati === true;
+$("datiSimulati").addEventListener("change", (e) => {
+  try {
+    localStorage.setItem(CHIAVE, JSON.stringify({ ...carica(), datiSimulati: e.target.checked }));
+    stato(true, e.target.checked ? "Dati simulati attivati." : "Dati simulati disattivati.");
+  } catch (err) { e.target.checked = !e.target.checked; $("stato").hidden = true; $("errore").textContent = "Impossibile salvare: storage del browser non disponibile."; $("errore").hidden = false; }
 });
 
 $("costoPratica").addEventListener("focus", (e) => { e.target.value = String(parseEur(e.target.value)).replace(".", ","); e.target.select(); });

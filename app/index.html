@@ -45,6 +45,9 @@
         <label><input type="checkbox" id="noteNiente"> Niente note</label>
         <label><input type="checkbox" id="noteVuote"> Note vuote</label>
       </div>
+      <div class="opzioni-note">
+        <label><input type="checkbox" id="includiScontoPratica" checked> Includi sconto effettivo con pratica</label>
+      </div>
     </section>
 
     <section class="card">
@@ -72,7 +75,8 @@
         <div><dt>Totale</dt><dd id="totale">–</dd></div>
         <div><dt>Incidenza costo</dt><dd id="incidenza">–</dd></div>
       </dl>
-      <div class="big"><span>Sconto EFFETTIVO</span><strong id="sconto">–</strong></div>
+      <div class="big"><span>Sconto sui beni</span><strong id="scontoBando">–</strong></div>
+      <div class="big"><span>Sconto effettivo con pratica inclusa</span><strong id="sconto">–</strong></div>
       <div class="azioni">
         <button id="genera" class="btn-genera" type="button"> Word</button>
         <button id="generaPdf" class="btn-genera" type="button"> PDF</button>

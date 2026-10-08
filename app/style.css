@@ -70,8 +70,8 @@ dl { margin: 0 0 16px; }
 dl div { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.25); font-size: 13px; }
 dt { opacity: .9; }
 dd { margin: 0; font-weight: 700; }
-.big { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
-.big strong { font-size: 30px; }
+.big { gap: 12px; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.big strong { font-size: 30px; white-space: nowrap; }
 button {
   width: 100%; padding: 11px; border: 0; border-radius: 8px; font: inherit; font-weight: 700;
   background: #fff; color: var(--accent); cursor: pointer;
@@ -146,7 +146,7 @@ input, select { min-width: 0; }
   .voce-auto > span:nth-child(5) { display: none; }
   dl div { gap: 12px; }
   dd { text-align: right; }
-  .big strong { font-size: 26px; }
+  .big strong { font-size: 26px; white-space: nowrap; }
   .azioni { grid-template-columns: 1fr; }
   .modale { padding: 16px; width: 96vw; }
   .modale-azioni { flex-wrap: wrap; }
